@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/xmszm/skills/yunxiao-workitem/schema/yunxiao-workitem.schema.json",
+  "title": "yunxiao-workitem config",
+  "type": "object",
+  "required": [
+    "version",
+    "organization_id",
+    "project_id",
+    "project_code",
+    "owners",
+    "statuses"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "organization": {
+      "type": "string"
+    },
+    "organization_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "default_query": {
+      "type": "string"
+    },
+    "owners": {
+      "type": "object",
+      "properties": {
+        "backend": { "type": "string" },
+        "ui_product": { "type": "string" },
+        "qa": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "work_item_types": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "statuses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "status", "id", "meaning"],
+        "properties": {
+          "type": { "type": "string" },
+          "status": { "type": "string" },
+          "id": { "type": "string" },
+          "meaning": {
+            "type": "string",
+            "enum": ["unfinished", "active", "terminal", "unknown"]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "unfinished_statuses": {
+      "type": "string"
+    },
+    "active_status": {
+      "type": "string"
+    },
+    "repository_rules": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "production_targets": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "reference_targets": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "status_policy": {
+      "type": "string"
+    },
+    "implementation_rules": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "validations": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": { "type": "string" }
+      }
+    },
+    "runtime_notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "final_fields": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}
+

@@ -1,0 +1,14 @@
+{
+  "rawText": "当前弹窗字段与示意图不一致。",
+  "annotatedText": "当前弹窗字段与示意图不一致。\n{{image:comment-123-1 path:/tmp/yunxiao-workitems/DEMO-1/abc123.png}}",
+  "images": {
+    "comment-123-1": {
+      "fileIdentifier": "abc123",
+      "path": "/tmp/yunxiao-workitems/DEMO-1/abc123.png",
+      "valid": true,
+      "source": "rich_text",
+      "name": "screenshot.png"
+    }
+  }
+}
+

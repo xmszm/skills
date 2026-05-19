@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yunxiao Work Item"
+  short_description: "Handle Yunxiao work items with config, evidence checks, and scripted comments."
+  default_prompt: "Use yunxiao-workitem to inspect the current repo config, read comments and images before scoring, implement safely, validate, and produce the right outcome comment."

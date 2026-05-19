@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "organization": "Example Org",
+  "organization_id": "example-org-id",
+  "project": "Example Space",
+  "project_id": "example-project-id",
+  "project_code": "DEMO",
+  "default_query": "assigned to `self` and not completed",
+  "owners": {
+    "backend": "后端负责人",
+    "ui_product": "前端负责人",
+    "qa": "测试负责人"
+  },
+  "work_item_types": ["Bug", "Task"],
+  "statuses": [
+    {
+      "type": "Bug",
+      "status": "待处理",
+      "id": "1001",
+      "meaning": "unfinished"
+    },
+    {
+      "type": "Bug",
+      "status": "处理中",
+      "id": "1002",
+      "meaning": "active"
+    },
+    {
+      "type": "Bug",
+      "status": "已关闭",
+      "id": "1003",
+      "meaning": "terminal"
+    }
+  ],
+  "unfinished_statuses": "1001",
+  "active_status": "1002",
+  "repository_rules": [
+    "Do not update Yunxiao status automatically without explicit policy."
+  ],
+  "production_targets": ["admin/src", "h5/src"],
+  "reference_targets": ["admin-ui/src"],
+  "status_policy": "Do not update statuses automatically unless the user or project config explicitly allows it.",
+  "implementation_rules": [
+    "Treat demo and mock directories as reference-only by default."
+  ],
+  "validations": [
+    ["admin", "pnpm -C admin lint"],
+    ["h5", "pnpm -C h5 lint"]
+  ],
+  "runtime_notes": [
+    "Read comments before clarity scoring."
+  ],
+  "final_fields": [
+    "mode",
+    "handled",
+    "unmodified",
+    "postponed"
+  ]
+}
+

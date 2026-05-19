@@ -1,0 +1,14 @@
+{
+  "project": "后台",
+  "trigger_path": "后台 > 知识详情 > 任务列表",
+  "changes": [
+    "新增任务列表页面入口",
+    "知识详情任务链接改为跳转任务列表"
+  ],
+  "verification_level": "Level 2",
+  "verification_result": "已完成页面跳转与返回路径验证",
+  "notes": [
+    "保留原页面缓存，不额外刷新知识详情页"
+  ]
+}
+

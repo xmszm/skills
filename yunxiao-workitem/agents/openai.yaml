@@ -1,4 +1,4 @@
 interface:
   display_name: "Yunxiao Work Item"
-  short_description: "Handle Yunxiao items, including Trellis full import-and-execute, evidence checks, bounded processing, and scripted comments."
-  default_prompt: "Use yunxiao-workitem to select the right mode. For Trellis full, keep importing Yunxiao evidence and images into Trellis tasks until no creatable items remain, then execute the created Trellis task queue and write back configured markers/statuses. For processing, inspect comments/images before scoring, implement bounded items safely, validate, and use scripted comments/status updates."
+  short_description: "Handle Yunxiao items, including full import-and-execute in Trellis repos, evidence checks, bounded processing, and scripted comments."
+  default_prompt: "Use yunxiao-workitem to select the right mode. In a repo with .trellis/workflow.md, user-facing full means keep importing Yunxiao evidence and images into Trellis tasks until no creatable items remain, then execute the created Trellis task queue and write back configured markers/statuses; do not invent a separate Trellis-specific mode name. For direct processing, inspect comments/images before scoring, implement bounded items safely, validate, and use scripted comments/status updates."

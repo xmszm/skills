@@ -5,13 +5,13 @@ of being handled as ad hoc Yunxiao-only implementation work.
 
 ## Intent
 
-There are two Trellis modes:
+There are two Trellis strategies under the normal mode names:
 
 - `trellis-intake`: create or update Trellis tasks from Yunxiao evidence, then
   stop.
-- `trellis-full`: first drain all creatable Yunxiao items into Trellis tasks,
-  then execute the created Trellis task queue through the normal Trellis
-  workflow and perform configured writeback/marking.
+- `full` in a Trellis repo: first drain all creatable Yunxiao items into
+  Trellis tasks, then execute the created Trellis task queue through the normal
+  Trellis workflow and perform configured writeback/marking.
 
 Plain intake is a planning/import flow:
 
@@ -19,7 +19,7 @@ Plain intake is a planning/import flow:
 query Yunxiao -> read evidence/images -> split/group -> create Trellis tasks -> stop
 ```
 
-`trellis-full` is an end-to-end orchestration flow:
+`full` in a Trellis repo is an end-to-end orchestration flow:
 
 ```text
 query/enrich/split/create loop until no creatable items remain
@@ -28,8 +28,10 @@ query/enrich/split/create loop until no creatable items remain
 -> report
 ```
 
-Do not stop `trellis-full` merely because one Trellis task was created or one
-bounded query page was consumed.
+Do not stop `full` in a Trellis repo merely because one Trellis task was created,
+one Trellis task was implemented, one bounded query page was consumed, or
+`runtime_limits.stop_after_code_change` is true. That setting applies only to
+direct non-Trellis Yunxiao processing.
 
 ## Preconditions
 
@@ -47,8 +49,8 @@ python3 ./.trellis/scripts/task.py create "<title>" --slug <slug>
 
 If `.trellis/workflow.md` says that implementation work must start from
 `task.py create`, create tasks in `planning` during the intake phase. In
-`trellis-full`, start and execute those tasks only after the intake-drain phase
-has no remaining creatable Yunxiao items.
+`full` in a Trellis repo, start and execute those tasks only after the
+intake-drain phase has no remaining creatable Yunxiao items.
 
 ## Bounded Intake Rounds
 
@@ -63,7 +65,7 @@ These are per-round limits, not total-run limits.
 For `trellis-intake`, stop after the requested bounded set unless the user asks
 to continue.
 
-For `trellis-full`, repeat bounded intake rounds automatically:
+For `full` in a Trellis repo, repeat bounded intake rounds automatically:
 
 1. Query one bounded page.
 2. Enrich up to `max_enrich_per_round`.
@@ -130,14 +132,14 @@ For each created task, write or update `prd.md` with:
 
 Use `task.py create` with `--parent` when creating child tasks under an intake
 or epic task. Do not run `task.py start` during the intake-drain phase. In
-`trellis-full`, run `task.py start` only after the final intake query confirms
-there are no more creatable Yunxiao items.
+`full` in a Trellis repo, run `task.py start` only after the final intake query
+confirms there are no more creatable Yunxiao items.
 
 When multiple tasks are created, the Trellis active-task pointer may point at
 the last created task. Keep an explicit ordered queue and do not rely on the
 active pointer alone.
 
-## Trellis Full Execution
+## Full Execution In Trellis Repos
 
 After intake-drain completes, execute the created Trellis task queue in a stable
 order:
@@ -172,8 +174,8 @@ Only write a Yunxiao comment during intake if the user explicitly requests it.
 If a comment is requested, it must be a no-code/intake comment and must not say
 the item is fixed.
 
-For `trellis-full`, writeback happens after each Trellis task is implemented and
-validated:
+For `full` in a Trellis repo, writeback happens after each Trellis task is
+implemented and validated:
 
 - render comments with `scripts/render_comment.py`;
 - do not write done comments for source items that were only imported but not
@@ -186,12 +188,13 @@ validated:
 
 Report:
 
-- selected mode: `trellis-intake` or `trellis-full`
+- selected mode: `trellis-intake` or `full` with Trellis strategy
 - source query/filter
 - created or updated Trellis task paths
 - source Yunxiao keys mapped to each task
 - local image paths saved
-- for `trellis-full`, executed Trellis task outcomes and commits
-- for `trellis-full`, Yunxiao comment/status writeback outcomes per source key
+- for `full` in a Trellis repo, executed Trellis task outcomes and commits
+- for `full` in a Trellis repo, Yunxiao comment/status writeback outcomes per
+  source key
 - postponed/unmodified items and reasons
 - remaining blockers, if the full queue was not exhausted

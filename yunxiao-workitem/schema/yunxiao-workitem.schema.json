@@ -101,6 +101,28 @@
         "items": { "type": "string" }
       }
     },
+    "runtime_limits": {
+      "type": "object",
+      "properties": {
+        "query_page_size": { "type": "integer", "minimum": 1 },
+        "max_enrich_per_round": { "type": "integer", "minimum": 1 },
+        "max_implement_per_round": { "type": "integer", "minimum": 0 },
+        "max_trellis_tasks_per_round": { "type": "integer", "minimum": 1 },
+        "stop_after_code_change": { "type": "boolean" },
+        "full_requires_explicit_confirmation": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "trellis_intake": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "image_root": { "type": "string" },
+        "create_parent_task_for_full": { "type": "boolean" },
+        "leave_yunxiao_unchanged": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
     "runtime_notes": {
       "type": "array",
       "items": { "type": "string" }
@@ -112,4 +134,3 @@
   },
   "additionalProperties": true
 }
-

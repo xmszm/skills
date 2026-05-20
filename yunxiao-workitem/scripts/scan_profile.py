@@ -43,6 +43,20 @@ VALIDATION_SCRIPT_PRIORITY = (
     "test",
 )
 DEFAULT_CONFIG_PATH = Path(".trellis/config/yunxiao-workitem.json")
+DEFAULT_RUNTIME_LIMITS = {
+    "query_page_size": 5,
+    "max_enrich_per_round": 3,
+    "max_implement_per_round": 1,
+    "max_trellis_tasks_per_round": 5,
+    "stop_after_code_change": True,
+    "full_requires_explicit_confirmation": True,
+}
+DEFAULT_TRELLIS_INTAKE = {
+    "enabled": True,
+    "image_root": ".trellis/workspace/yunxiao-images",
+    "create_parent_task_for_full": True,
+    "leave_yunxiao_unchanged": True,
+}
 
 
 def read_text(path: Path, limit: int = 200_000) -> str:
@@ -348,6 +362,14 @@ def scan_profile(root: Path, max_depth: int) -> dict[str, Any]:
         "status_policy": existing.get("status_policy", ""),
         "implementation_rules": existing.get("implementation_rules", []),
         "validations": existing.get("validations", validations),
+        "runtime_limits": {
+            **DEFAULT_RUNTIME_LIMITS,
+            **existing.get("runtime_limits", {}),
+        },
+        "trellis_intake": {
+            **DEFAULT_TRELLIS_INTAKE,
+            **existing.get("trellis_intake", {}),
+        },
         "runtime_notes": existing.get("runtime_notes", []),
         "final_fields": existing.get("final_fields", [
             "Yunxiao status/comment update when applicable.",

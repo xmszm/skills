@@ -47,6 +47,20 @@
     ["admin", "pnpm -C admin lint"],
     ["h5", "pnpm -C h5 lint"]
   ],
+  "runtime_limits": {
+    "query_page_size": 5,
+    "max_enrich_per_round": 3,
+    "max_implement_per_round": 1,
+    "max_trellis_tasks_per_round": 5,
+    "stop_after_code_change": true,
+    "full_requires_explicit_confirmation": true
+  },
+  "trellis_intake": {
+    "enabled": true,
+    "image_root": ".trellis/workspace/yunxiao-images",
+    "create_parent_task_for_full": true,
+    "leave_yunxiao_unchanged": true
+  },
   "runtime_notes": [
     "Read comments before clarity scoring."
   ],
@@ -57,4 +71,3 @@
     "postponed"
   ]
 }
-

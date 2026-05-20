@@ -10,6 +10,20 @@ from typing import Any
 
 
 DEFAULT_CONFIG_PATH = ".trellis/config/yunxiao-workitem.json"
+DEFAULT_RUNTIME_LIMITS = {
+    "query_page_size": 5,
+    "max_enrich_per_round": 3,
+    "max_implement_per_round": 1,
+    "max_trellis_tasks_per_round": 5,
+    "stop_after_code_change": True,
+    "full_requires_explicit_confirmation": True,
+}
+DEFAULT_TRELLIS_INTAKE = {
+    "enabled": True,
+    "image_root": ".trellis/workspace/yunxiao-images",
+    "create_parent_task_for_full": True,
+    "leave_yunxiao_unchanged": True,
+}
 
 
 def comma_list(value: str) -> list[str]:
@@ -113,6 +127,14 @@ def normalize(config: dict[str, Any]) -> dict[str, Any]:
         ),
         "implementation_rules": config.get("implementation_rules", []),
         "validations": config.get("validations", []),
+        "runtime_limits": {
+            **DEFAULT_RUNTIME_LIMITS,
+            **config.get("runtime_limits", {}),
+        },
+        "trellis_intake": {
+            **DEFAULT_TRELLIS_INTAKE,
+            **config.get("trellis_intake", {}),
+        },
         "runtime_notes": config.get("runtime_notes", []),
         "final_fields": config.get("final_fields", []),
     }

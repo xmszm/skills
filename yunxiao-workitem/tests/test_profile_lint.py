@@ -29,6 +29,20 @@ class ProfileLintTests(unittest.TestCase):
             ],
             "production_targets": ["admin/src"],
             "validations": [["admin", "pnpm -C admin lint"]],
+            "runtime_limits": {
+                "query_page_size": 5,
+                "max_enrich_per_round": 3,
+                "max_implement_per_round": 1,
+                "max_trellis_tasks_per_round": 5,
+                "stop_after_code_change": True,
+                "full_requires_explicit_confirmation": True,
+            },
+            "trellis_intake": {
+                "enabled": True,
+                "image_root": ".trellis/workspace/yunxiao-images",
+                "create_parent_task_for_full": True,
+                "leave_yunxiao_unchanged": True,
+            },
         }
         with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
             json.dump(payload, handle, ensure_ascii=False)
@@ -71,6 +85,38 @@ class ProfileLintTests(unittest.TestCase):
 
         self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("status updates appear enabled", result.stdout)
+
+    def test_invalid_runtime_limits_fail(self) -> None:
+        payload = {
+            "version": 1,
+            "organization_id": "org-1",
+            "project_id": "proj-1",
+            "project_code": "DEMO",
+            "statuses": [
+                {"type": "Bug", "status": "待处理", "id": "1", "meaning": "unfinished"},
+                {"type": "Bug", "status": "处理中", "id": "2", "meaning": "active"},
+                {"type": "Bug", "status": "已关闭", "id": "3", "meaning": "terminal"},
+            ],
+            "runtime_limits": {
+                "query_page_size": 0,
+                "stop_after_code_change": "yes",
+            },
+        }
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
+            json.dump(payload, handle, ensure_ascii=False)
+            temp_path = handle.name
+        try:
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), "--config-path", temp_path],
+                capture_output=True,
+                text=True,
+            )
+        finally:
+            Path(temp_path).unlink(missing_ok=True)
+
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("runtime_limits.query_page_size", result.stdout)
+        self.assertIn("runtime_limits.stop_after_code_change", result.stdout)
 
 
 if __name__ == "__main__":

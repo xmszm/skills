@@ -43,6 +43,58 @@ def collect_status_meanings(statuses: list[dict[str, Any]]) -> dict[str, list[st
     return buckets
 
 
+def lint_runtime_limits(config: dict[str, Any], errors: list[str], warnings: list[str]) -> None:
+    limits = config.get("runtime_limits", {})
+    if limits in ({}, None):
+        warnings.append("runtime_limits is empty; using skill defaults")
+        return
+    if not isinstance(limits, dict):
+        errors.append("runtime_limits must be an object")
+        return
+
+    positive_ints = (
+        "query_page_size",
+        "max_enrich_per_round",
+        "max_trellis_tasks_per_round",
+    )
+    for name in positive_ints:
+        value = limits.get(name)
+        if value is None:
+            continue
+        if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+            errors.append(f"runtime_limits.{name} must be a positive integer")
+
+    value = limits.get("max_implement_per_round")
+    if value is not None and (
+        not isinstance(value, int) or isinstance(value, bool) or value < 0
+    ):
+        errors.append("runtime_limits.max_implement_per_round must be a non-negative integer")
+
+    for name in ("stop_after_code_change", "full_requires_explicit_confirmation"):
+        value = limits.get(name)
+        if value is not None and not isinstance(value, bool):
+            errors.append(f"runtime_limits.{name} must be a boolean")
+
+
+def lint_trellis_intake(config: dict[str, Any], errors: list[str], warnings: list[str]) -> None:
+    intake = config.get("trellis_intake", {})
+    if intake in ({}, None):
+        warnings.append("trellis_intake is empty; Trellis full will use skill defaults")
+        return
+    if not isinstance(intake, dict):
+        errors.append("trellis_intake must be an object")
+        return
+
+    image_root = intake.get("image_root")
+    if image_root is not None and not str(image_root).strip():
+        errors.append("trellis_intake.image_root must not be empty")
+
+    for name in ("enabled", "create_parent_task_for_full", "leave_yunxiao_unchanged"):
+        value = intake.get(name)
+        if value is not None and not isinstance(value, bool):
+            errors.append(f"trellis_intake.{name} must be a boolean")
+
+
 def lint_config(config: dict[str, Any]) -> dict[str, Any]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -87,6 +139,9 @@ def lint_config(config: dict[str, Any]) -> dict[str, Any]:
         warnings.append("production_targets is empty")
     if not config.get("validations"):
         warnings.append("validations is empty")
+
+    lint_runtime_limits(config, errors, warnings)
+    lint_trellis_intake(config, errors, warnings)
 
     owners = config.get("owners", {})
     if isinstance(owners, dict):

@@ -89,7 +89,14 @@ def lint_trellis_intake(config: dict[str, Any], errors: list[str], warnings: lis
     if image_root is not None and not str(image_root).strip():
         errors.append("trellis_intake.image_root must not be empty")
 
-    for name in ("enabled", "create_parent_task_for_full", "leave_yunxiao_unchanged"):
+    for name in (
+        "enabled",
+        "create_parent_task_for_full",
+        "leave_yunxiao_unchanged",
+        "full_drain_until_no_creatable",
+        "full_execute_after_intake",
+        "writeback_after_task_done",
+    ):
         value = intake.get(name)
         if value is not None and not isinstance(value, bool):
             errors.append(f"trellis_intake.{name} must be a boolean")

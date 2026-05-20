@@ -119,7 +119,10 @@
         "enabled": { "type": "boolean" },
         "image_root": { "type": "string" },
         "create_parent_task_for_full": { "type": "boolean" },
-        "leave_yunxiao_unchanged": { "type": "boolean" }
+        "leave_yunxiao_unchanged": { "type": "boolean" },
+        "full_drain_until_no_creatable": { "type": "boolean" },
+        "full_execute_after_intake": { "type": "boolean" },
+        "writeback_after_task_done": { "type": "boolean" }
       },
       "additionalProperties": true
     },

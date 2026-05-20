@@ -56,6 +56,9 @@ DEFAULT_TRELLIS_INTAKE = {
     "image_root": ".trellis/workspace/yunxiao-images",
     "create_parent_task_for_full": True,
     "leave_yunxiao_unchanged": True,
+    "full_drain_until_no_creatable": True,
+    "full_execute_after_intake": True,
+    "writeback_after_task_done": True,
 }
 
 

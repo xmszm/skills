@@ -12,7 +12,7 @@ matches the selected mode.
 ## Reference Map
 
 - Init or config bootstrap: read `references/init_config.md`.
-- Trellis intake, especially `trellis full`: read `references/trellis_intake.md`.
+- Trellis intake or `trellis full`: read `references/trellis_intake.md`.
 - Single/batch/full implementation processing: read `references/processing_modes.md`.
 - Evidence, comments, screenshots, rich-text images, and clarity scoring: read
   `references/evidence_clarity.md`; for embedded images also read
@@ -25,16 +25,17 @@ matches the selected mode.
 
 There are two different jobs:
 
-1. **Trellis intake** creates local Trellis work tasks from Yunxiao evidence.
-   It reads Yunxiao items and images, writes Trellis task artifacts, and stops.
-   It does not edit product code, write done comments, or update Yunxiao status.
+1. **Trellis intake/full** converts Yunxiao evidence into local Trellis work
+   tasks first. Plain intake stops after task creation. `trellis full` keeps
+   querying and creating until no more creatable Yunxiao items remain, then
+   executes the created Trellis task queue and performs configured writeback.
 2. **Work-item processing** handles Yunxiao items directly. It inspects one item
    or a bounded set, implements only actionable items, validates, writes the
    outcome comment/status when allowed, commits, and then moves to the next item.
 
-Do not mix these jobs in one mode. If the user says `trellis` together with
-`full`, `全部`, `拆分`, `创建任务`, `导入`, or equivalent, select
-`trellis-intake`, not implementation `full`.
+Do not confuse Trellis full with implementation `full`. If the user says
+`trellis` together with `full`, `全部`, `直到没有`, or equivalent, select
+`trellis-full`, not implementation `full`.
 
 ## Preflight
 
@@ -56,8 +57,10 @@ Do not hard-code one project's IDs or owners in this global skill.
 Choose exactly one mode before querying.
 
 - `init`: `$yunxiao-workitem init` or explicit bootstrap/update of local config.
-- `trellis-intake`: the user wants Yunxiao items turned into Trellis work tasks,
-  especially `trellis full`.
+- `trellis-intake`: the user wants Yunxiao items turned into Trellis work tasks
+  and does not ask to execute them now.
+- `trellis-full`: the user wants Yunxiao items fully drained into Trellis tasks,
+  then wants the created Trellis tasks executed and marked/written back.
 - `single`: one exact key/ID, or the user says to handle one item.
 - `batch`: a bounded count, page, module, priority slice, or "先做几个".
 - `full`: the user explicitly wants all matching Yunxiao items processed without
@@ -82,10 +85,11 @@ or these defaults:
 }
 ```
 
-`full` means repeated bounded rounds, not one large fetch. Query a small page,
-enrich a smaller candidate set, complete at most one implementation unit, then
-write back and report progress before continuing when `stop_after_code_change`
-is true.
+`full` means repeated bounded rounds, not one large fetch. For implementation
+`full`, `stop_after_code_change` may create a checkpoint after one code-change
+unit. For `trellis-full`, creation limits are per round only: continue querying
+and creating until no remaining Yunxiao item can become a Trellis task, then
+execute the created Trellis task queue.
 
 ## Mode Summaries
 
@@ -95,19 +99,26 @@ Use only for config/profile bootstrap. Do not query implementation batches,
 edit product code, write Yunxiao comments, or update Yunxiao statuses. Follow
 `references/init_config.md`.
 
-### Trellis Intake
+### Trellis Intake / Full
 
-Use when the user asks Trellis to consume Yunxiao items, including `trellis full`.
+Use when the user asks Trellis to consume Yunxiao items.
 
-Pipeline:
+Plain intake pipeline:
 
 ```text
 query -> enrich evidence/images -> normalize -> split/group -> create Trellis tasks -> report
 ```
 
-Stop after creating or updating Trellis task artifacts. Leave Yunxiao unchanged
-unless the user explicitly asks for a separate no-code comment. Follow
-`references/trellis_intake.md`.
+`trellis-full` pipeline:
+
+```text
+query/enrich/split/create loop until no creatable items remain
+-> execute created Trellis task queue through normal Trellis workflow
+-> validate/commit/write back per task
+-> final report
+```
+
+Follow `references/trellis_intake.md`.
 
 ### Single
 
@@ -173,5 +184,6 @@ workflows.
 Tell the user the selected mode, what was handled or created, validation result
 when code changed, Yunxiao comment/status outcomes already attempted per item,
 and any unmodified/postponed items with short reasons. For Trellis intake, list
-created/updated Trellis task paths and source Yunxiao keys; do not imply code
-has been implemented.
+created/updated Trellis task paths and source Yunxiao keys. For `trellis-full`,
+also report which created Trellis tasks were executed and which source Yunxiao
+items were marked/written back.

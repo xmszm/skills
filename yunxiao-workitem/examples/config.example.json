@@ -59,7 +59,10 @@
     "enabled": true,
     "image_root": ".trellis/workspace/yunxiao-images",
     "create_parent_task_for_full": true,
-    "leave_yunxiao_unchanged": true
+    "leave_yunxiao_unchanged": true,
+    "full_drain_until_no_creatable": true,
+    "full_execute_after_intake": true,
+    "writeback_after_task_done": true
   },
   "runtime_notes": [
     "Read comments before clarity scoring."

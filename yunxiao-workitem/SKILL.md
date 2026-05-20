@@ -74,6 +74,14 @@ Runtime modes share the same item pipeline:
 query -> enrich -> normalize -> analyze -> implement/skip -> validate -> comment/status -> commit -> report
 ```
 
+For every implemented work item, `comment/status` is a per-item completion
+barrier, not a final-run cleanup phase. After that item's verification passes,
+render the outcome comment, write the comment, apply the configured status
+update, and record both results in the run ledger before moving on to the next
+unrelated item. Do not batch status updates at the end of `batch` or `full`
+mode. The final report only summarizes the ledger and must not be the first
+place where completed-item statuses are changed.
+
 The write steps are conditional. Only items with code changes and successful
 verification should receive done comments, review/in-progress status updates, and
 commits, unless the user explicitly requests a different no-code write.
@@ -127,7 +135,11 @@ Use `full` when the user wants all matching items completed.
    them reappear.
 4. Keep a run ledger of handled keys, skipped keys and reasons, postponed video
    items, commits, failed status/comment writes, and remaining blockers.
-5. Continue until the query returns no remaining actionable items.
+5. Before querying the next bounded batch, ensure every handled item from the
+   current batch has already had its outcome comment and configured status
+   update attempted together. Never leave successful item status moves for a
+   final sweep after all code work is done.
+6. Continue until the query returns no remaining actionable items.
 
 Full mode must not stop merely because one bounded batch or page was completed.
 It may stop only when:
@@ -568,16 +580,23 @@ Backend gap comment shape:
      typecheck/build plus code-path inspection. Do not silently downgrade; state
      the intended level and performed substitute.
    - When uncertain between two levels, choose the higher level.
-4. Apply any project-config status update rule, such as moving the item to the
-   configured in-progress status. Never move an item to a terminal/final status
-   unless the user explicitly asks for that exact status.
-5. If code was changed and verification passed, apply the project-config
-   post-implementation review status when one is configured, for example a
-   non-terminal status used by the human reviewer. If Yunxiao rejects the
-   transition, do not force another status or chain speculative intermediate
-   transitions; report the failed target status in the final response.
-6. If code was changed for the item, add one concise outcome-matched Yunxiao
-   comment.
+4. Apply any project-config active/in-progress status update rule at the start
+   of work when required, such as moving the item to the configured in-progress
+   status. Never move an item to a terminal/final status unless the user
+   explicitly asks for that exact status.
+5. If code was changed for the item and verification passed, complete the
+   Yunxiao writeback for that item immediately, before continuing to unrelated
+   work:
+   - Render one concise outcome-matched Yunxiao comment.
+   - Send exactly that rendered comment.
+   - Apply the project-config post-implementation review status when one is
+     configured, for example a non-terminal status used by the human reviewer.
+   - Record both comment and status outcomes in the run ledger.
+   If Yunxiao rejects the transition, do not force another status or chain
+   speculative intermediate transitions; keep the comment/status failure tied
+   to that item in the ledger and report the failed target status in the final
+   response.
+6. For the outcome comment:
    - First build a structured comment record with the actual project,
      trigger path, changes, verification level, verification result, and notes.
    - `trigger path` means the user-facing product path or visible page section,
@@ -636,6 +655,9 @@ Backend gap comment shape:
 - Keep a run ledger entry for each comment with: work item key, comment kind,
   config path or command used to render it, and whether the rendered text was
   sent unchanged.
+- When a status update is also applicable for the same item, attempt it in the
+  same per-item writeback window as the comment. Do not leave the status update
+  to the end of the run while the comment was already written.
 - Done comments require structured fields for requirement, clarity,
   completion, project, trigger path, concrete changes, changed files, and
   verification.
@@ -653,6 +675,11 @@ Changing Yunxiao status is config-driven or user-driven:
   "待处理", when the human reviewer needs the item moved after code and comment
   are complete. This is allowed only when the status is non-terminal and the
   item has code changes plus successful verification.
+- Post-implementation status updates must be attempted per item immediately
+  after that item's outcome comment is written. In `batch` and `full` modes,
+  do not accumulate successful items and update their statuses in a final
+  pass; the final response may only summarize status outcomes already attempted
+  during item processing.
 - Do not infer that "code changed", "build passed", "committed", or "pushed"
   means the item should be marked fixed.
 - If Yunxiao rejects the configured transition, leave the status unchanged and
@@ -675,7 +702,9 @@ Tell the user:
 - The selected mode and whether its stop condition was reached.
 - Which Yunxiao items were handled.
 - Validation result at package or batch level.
-- Yunxiao status/comment update when applicable.
+- Yunxiao comment/status update outcomes already attempted per item. The final
+  response is a summary only; do not perform first-time completed-item status
+  updates during final reporting.
 - Which inspected items were left unmodified, with a short reason, when no code
   change was made and the item was intentionally left without Yunxiao
   comment/status updates.

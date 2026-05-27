@@ -117,7 +117,11 @@
       "type": "object",
       "properties": {
         "enabled": { "type": "boolean" },
-        "image_root": { "type": "string" },
+        "image_root": {
+          "type": "string",
+          "default": "system-cache",
+          "description": "Local cache root for downloaded Yunxiao screenshots. Use 'system-cache' to resolve to the OS cache directory (Windows LOCALAPPDATA, macOS Library/Caches, Linux XDG_CACHE_HOME or ~/.cache). Use project paths only when binary evidence should be versioned intentionally."
+        },
         "create_parent_task_for_full": { "type": "boolean" },
         "leave_yunxiao_unchanged": { "type": "boolean" },
         "full_drain_until_no_creatable": { "type": "boolean" },

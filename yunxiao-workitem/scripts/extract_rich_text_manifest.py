@@ -13,6 +13,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
+from cache_paths import resolve_cache_root
+
 
 FILE_ID_RE = re.compile(r"fileIdentifier=([A-Za-z0-9]+)")
 WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
@@ -184,7 +186,7 @@ class RichTextHTMLParser(HTMLParser):
 
 def extract(value: Any, source_label: str, item_key: str, cache_root: str) -> dict[str, Any]:
     value = maybe_json(value)
-    builder = ManifestBuilder(source_label=source_label, item_key=item_key, cache_root=cache_root)
+    builder = ManifestBuilder(source_label=source_label, item_key=item_key, cache_root=str(resolve_cache_root(cache_root)))
     if isinstance(value, dict):
         if isinstance(value.get("jsonMLValue"), list):
             walk_jsonml(value["jsonMLValue"], builder)
@@ -207,7 +209,7 @@ def main() -> int:
     parser.add_argument("--field", help="Field to read when input is a work item JSON object")
     parser.add_argument("--source-label", default="description", help="Placeholder prefix, e.g. description or comment-123")
     parser.add_argument("--item-key", default="unknown-item", help="Work item key for cache path")
-    parser.add_argument("--cache-root", default="/tmp/yunxiao-workitems", help="Image cache root")
+    parser.add_argument("--cache-root", default="system-cache", help="Image cache root or 'system-cache'")
     args = parser.parse_args()
 
     data = pick_rich_text(load_input(args.input), args.field)

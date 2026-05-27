@@ -87,8 +87,18 @@ For each candidate:
 2. Fetch detail and comments only for selected candidates.
 3. Extract rich-text image manifests for descriptions and relevant comments.
 4. Download embedded images through `get_workitem_file` and store them under a
-   stable Trellis workspace path, for example:
-   `.trellis/workspace/yunxiao-images/<KEY>/<image-name>.png`.
+   stable system cache path. Default `trellis_intake.image_root` is
+   `system-cache`, which resolves to:
+   - Windows: `%LOCALAPPDATA%\Codex\yunxiao-workitem\images`
+   - macOS: `~/Library/Caches/Codex/yunxiao-workitem/images`
+   - Linux: `$XDG_CACHE_HOME/codex/yunxiao-workitem/images` or
+     `~/.cache/codex/yunxiao-workitem/images`
+   The `YUNXIAO_WORKITEM_CACHE_DIR` environment variable may override the root.
+   Do not place downloaded screenshots under project paths such as
+   `.trellis/workspace/` or `.trellis/tasks/` unless the project config
+   explicitly chooses to version binary evidence. PRDs may reference the local
+   cache path, but task commits should not include screenshot binaries by
+   default.
 5. Inspect images needed to understand the requirement.
 6. Postpone video-evidence items and do not create implementation tasks from
    unsupported video-only evidence unless the PRD explicitly says evidence is
@@ -192,7 +202,8 @@ Report:
 - source query/filter
 - created or updated Trellis task paths
 - source Yunxiao keys mapped to each task
-- local image paths saved
+- local image cache paths saved, and whether any binaries were intentionally
+  versioned
 - for `full` in a Trellis repo, executed Trellis task outcomes and commits
 - for `full` in a Trellis repo, Yunxiao comment/status writeback outcomes per
   source key

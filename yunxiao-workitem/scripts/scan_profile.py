@@ -53,7 +53,7 @@ DEFAULT_RUNTIME_LIMITS = {
 }
 DEFAULT_TRELLIS_INTAKE = {
     "enabled": True,
-    "image_root": ".trellis/workspace/yunxiao-images",
+    "image_root": "system-cache",
     "create_parent_task_for_full": True,
     "leave_yunxiao_unchanged": True,
     "full_drain_until_no_creatable": True,

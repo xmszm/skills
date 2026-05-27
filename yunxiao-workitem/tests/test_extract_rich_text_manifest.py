@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -19,6 +20,10 @@ class ExtractManifestTests(unittest.TestCase):
             json.dump(payload, handle, ensure_ascii=False)
             temp_path = handle.name
         try:
+            env = {
+                **os.environ,
+                "YUNXIAO_WORKITEM_CACHE_DIR": str(Path(temp_path).parent / "yunxiao-cache"),
+            }
             result = subprocess.run(
                 [
                     sys.executable,
@@ -33,6 +38,7 @@ class ExtractManifestTests(unittest.TestCase):
                 check=True,
                 capture_output=True,
                 text=True,
+                env=env,
             )
             manifest = json.loads(result.stdout)
         finally:
@@ -41,6 +47,7 @@ class ExtractManifestTests(unittest.TestCase):
         self.assertIn("{{image:description-1", manifest["annotatedText"])
         self.assertIn("description-1", manifest["images"])
         self.assertEqual(manifest["images"]["description-1"]["fileIdentifier"], "abc123")
+        self.assertIn("yunxiao-cache", manifest["images"]["description-1"]["path"])
 
 
 if __name__ == "__main__":

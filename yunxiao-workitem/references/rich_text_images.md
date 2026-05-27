@@ -32,8 +32,15 @@ Best path:
    placeholders that include the target local file path.
 3. For each image in the manifest, call `get_workitem_file` with
    `organizationId`, `workitemId`, and `id: <fileIdentifier>`.
-4. Cache downloaded files at the manifest `path`, for example
-   `/tmp/yunxiao-workitems/RJJV-56/fb122f634d3dff9b08c7b2b20a.png`.
+4. Cache downloaded files at the manifest `path`. By default,
+   `scripts/extract_rich_text_manifest.py` uses `system-cache`, resolved to
+   the OS cache directory:
+   - Windows: `%LOCALAPPDATA%\Codex\yunxiao-workitem\images`
+   - macOS: `~/Library/Caches/Codex/yunxiao-workitem/images`
+   - Linux: `$XDG_CACHE_HOME/codex/yunxiao-workitem/images` or
+     `~/.cache/codex/yunxiao-workitem/images`
+   Set `YUNXIAO_WORKITEM_CACHE_DIR` or pass `--cache-root <absolute-path>` only
+   when a project needs a different local cache.
 5. Download the returned signed OSS `url` immediately after calling
    `get_workitem_file`. Do not collect signed URLs first and download them
    later; these links can expire quickly.
@@ -72,11 +79,11 @@ Example manifest fragment:
 
 ```json
 {
-  "annotatedText": "当前弹窗字段跟上图无法对上：\n{{image:comment-20837910-1 path:/tmp/yunxiao-workitems/RJJV-55/6f368c5f9663cf419f03a9d7b7.png}}\n新增项目后，左下角记录有增加1，但列表中无法找到该条数据：\n{{image:comment-20837910-2 path:/tmp/yunxiao-workitems/RJJV-55/9cc2a26f7d6244a6b80d16e231.png}}",
+  "annotatedText": "当前弹窗字段跟上图无法对上：\n{{image:comment-20837910-1 path:<system-cache>/RJJV-55/6f368c5f9663cf419f03a9d7b7.png}}\n新增项目后，左下角记录有增加1，但列表中无法找到该条数据：\n{{image:comment-20837910-2 path:<system-cache>/RJJV-55/9cc2a26f7d6244a6b80d16e231.png}}",
   "images": {
     "comment-20837910-1": {
       "fileIdentifier": "6f368c5f9663cf419f03a9d7b7",
-      "path": "/tmp/yunxiao-workitems/RJJV-55/6f368c5f9663cf419f03a9d7b7.png",
+      "path": "<system-cache>/RJJV-55/6f368c5f9663cf419f03a9d7b7.png",
       "valid": true,
       "mime": "image/png"
     }

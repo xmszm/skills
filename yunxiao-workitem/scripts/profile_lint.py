@@ -10,6 +10,14 @@ from typing import Any
 
 
 DEFAULT_CONFIG_PATH = ".trellis/config/yunxiao-workitem.json"
+VERSIONED_TRELLIS_IMAGE_PREFIXES = (
+    ".trellis/workspace/",
+    ".trellis/tasks/",
+)
+SYSTEM_CACHE_IMAGE_ROOTS = {
+    "system-cache",
+    "system-cache://yunxiao-workitem/images",
+}
 
 
 def read_config(path: Path) -> dict[str, Any]:
@@ -88,6 +96,22 @@ def lint_trellis_intake(config: dict[str, Any], errors: list[str], warnings: lis
     image_root = intake.get("image_root")
     if image_root is not None and not str(image_root).strip():
         errors.append("trellis_intake.image_root must not be empty")
+    elif image_root is not None:
+        raw_root = str(image_root).strip()
+        normalized_root = raw_root.replace("\\", "/").rstrip("/") + "/"
+        if normalized_root in VERSIONED_TRELLIS_IMAGE_PREFIXES or any(
+            normalized_root.startswith(prefix) for prefix in VERSIONED_TRELLIS_IMAGE_PREFIXES
+        ):
+            warnings.append(
+                "trellis_intake.image_root points inside versioned Trellis paths; "
+                "prefer system-cache unless screenshot binaries "
+                "should be committed intentionally"
+            )
+        elif raw_root not in SYSTEM_CACHE_IMAGE_ROOTS and not Path(raw_root).is_absolute():
+            warnings.append(
+                "trellis_intake.image_root is a project-relative path; prefer "
+                "system-cache or an absolute OS cache directory"
+            )
 
     for name in (
         "enabled",

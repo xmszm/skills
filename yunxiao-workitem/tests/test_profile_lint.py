@@ -39,7 +39,7 @@ class ProfileLintTests(unittest.TestCase):
             },
             "trellis_intake": {
                 "enabled": True,
-                "image_root": ".trellis/workspace/yunxiao-images",
+                "image_root": "system-cache",
                 "create_parent_task_for_full": True,
                 "leave_yunxiao_unchanged": True,
                 "full_drain_until_no_creatable": True,
@@ -120,6 +120,66 @@ class ProfileLintTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("runtime_limits.query_page_size", result.stdout)
         self.assertIn("runtime_limits.stop_after_code_change", result.stdout)
+
+    def test_versioned_trellis_image_root_warns(self) -> None:
+        payload = {
+            "version": 1,
+            "organization_id": "org-1",
+            "project_id": "proj-1",
+            "project_code": "DEMO",
+            "statuses": [
+                {"type": "Bug", "status": "待处理", "id": "1", "meaning": "unfinished"},
+                {"type": "Bug", "status": "处理中", "id": "2", "meaning": "active"},
+                {"type": "Bug", "status": "已关闭", "id": "3", "meaning": "terminal"},
+            ],
+            "trellis_intake": {
+                "image_root": ".trellis/workspace/yunxiao-images",
+            },
+        }
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
+            json.dump(payload, handle, ensure_ascii=False)
+            temp_path = handle.name
+        try:
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), "--config-path", temp_path],
+                capture_output=True,
+                text=True,
+            )
+        finally:
+            Path(temp_path).unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("versioned Trellis paths", result.stdout)
+
+    def test_project_relative_image_root_warns(self) -> None:
+        payload = {
+            "version": 1,
+            "organization_id": "org-1",
+            "project_id": "proj-1",
+            "project_code": "DEMO",
+            "statuses": [
+                {"type": "Bug", "status": "待处理", "id": "1", "meaning": "unfinished"},
+                {"type": "Bug", "status": "处理中", "id": "2", "meaning": "active"},
+                {"type": "Bug", "status": "已关闭", "id": "3", "meaning": "terminal"},
+            ],
+            "trellis_intake": {
+                "image_root": "yunxiao-images",
+            },
+        }
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as handle:
+            json.dump(payload, handle, ensure_ascii=False)
+            temp_path = handle.name
+        try:
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), "--config-path", temp_path],
+                capture_output=True,
+                text=True,
+            )
+        finally:
+            Path(temp_path).unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("project-relative path", result.stdout)
 
 
 if __name__ == "__main__":

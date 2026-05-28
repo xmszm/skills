@@ -1,0 +1,4 @@
+interface:
+  display_name: "Role Review Profile"
+  short_description: "Interview roles into review rules"
+  default_prompt: "Use $role-review-profile to interview a target person and produce role-specific AI review rules."

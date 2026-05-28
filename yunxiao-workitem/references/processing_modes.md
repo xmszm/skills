@@ -21,12 +21,14 @@ and commits unless the user explicitly requests a different no-code write.
 ## Query Strategy
 
 1. If the user names an exact item key or ID, fetch that item first.
-2. Otherwise query assigned unfinished work items in the active Yunxiao project,
+2. If project config defines `unfinished_statuses`, use those IDs as an
+   allowlist. Do not replace them with broad text such as `not completed`.
+3. Otherwise query assigned unfinished work items in the active Yunxiao project,
    constrained by selected mode and user filters.
-3. Prefer statuses that mean pending review, pending processing, reopened,
-   to-do, or active processing when the user asks to continue.
-4. Avoid active-processing items unless the user asks for them or project config
-   includes active items in the unfinished set.
+4. Prefer statuses that mean pending review, pending processing, reopened, or
+   to-do. Avoid active-processing statuses such as `处理中` unless the user
+   explicitly asks for active items or project config explicitly includes that
+   active status in `unfinished_statuses`.
 5. In `single` without an exact item, pick one small clear item first. Prefer
    narrow UI defects with clear title and screenshot. Avoid payment, order-flow,
    API-contract, permissions, data migration, or cross-layer work from title

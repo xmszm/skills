@@ -41,6 +41,11 @@ Load these files when present:
 - `.trellis/config/yunxiao-workitem.json`
 - `AGENTS.md`
 
+For Trellis `full` or `trellis-intake`, `.trellis/config/yunxiao-workitem.json`
+is required before querying Yunxiao. If it is missing, stop and run/ask for
+`$yunxiao-workitem init` instead of guessing project IDs or broad status
+filters.
+
 Confirm the repo has Trellis task tooling, usually:
 
 ```bash
@@ -51,6 +56,16 @@ If `.trellis/workflow.md` says that implementation work must start from
 `task.py create`, create tasks in `planning` during the intake phase. In
 `full` in a Trellis repo, start and execute those tasks only after the
 intake-drain phase has no remaining creatable Yunxiao items.
+
+## Status Filtering
+
+When `.trellis/config/yunxiao-workitem.json` defines `unfinished_statuses`,
+treat those IDs as the authoritative intake allowlist. Do not broaden the query
+with natural-language filters such as `not completed`.
+
+For Trellis intake and Trellis `full`, only create tasks from configured
+unfinished/pending/reopened statuses unless the user explicitly asks to include
+active/in-progress work.
 
 ## Bounded Intake Rounds
 

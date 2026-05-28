@@ -13,6 +13,15 @@ Use this reference before writing any Yunxiao comment or status update.
   `暂未处理` and state exactly what is missing.
 - If the missing piece is an API/backend capability, mention the configured
   backend/API owner when known and use the backend-gap shape.
+- Yunxiao rich-text mentions should be sent as the original mention HTML when
+  available, for example
+  `<span class="sc-jJcwTH fUUHak"><span data-cangjie-key="1666" id="..." data-type="mention" class="sc-cPyLVi jAgzPW">@姓名</span></span>`.
+  Store or pass it as `backend_owner_mention_html`, `owner_mentions.backend`,
+  or `mentions.backend`; plain `@姓名` is only a fallback. If storing structured
+  data instead, keep the Yunxiao identifiers as
+  `backend_owner_mention.id`/`backend_owner_mention.data_cangjie_key` or the
+  same object under `owner_mentions.backend`/`mentions.backend`; do not invent
+  these values.
 - If an item was inspected but no code was changed, do not write a Yunxiao
   comment by default. Summarize it in the final response unless the user asks
   for a no-code/blocked comment.

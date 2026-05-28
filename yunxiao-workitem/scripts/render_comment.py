@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import html
 import json
 from typing import Any
 
@@ -29,9 +30,83 @@ def pick_list(config: dict[str, Any], name: str) -> list[str]:
     return []
 
 
+def pick_nested(config: dict[str, Any], object_name: str, name: str) -> str:
+    value = config.get(object_name, {})
+    if isinstance(value, dict):
+        nested = value.get(name, "")
+        return "" if nested is None else str(nested)
+    return ""
+
+
+def nested_value(config: dict[str, Any], object_name: str, name: str) -> Any:
+    value = config.get(object_name, {})
+    if isinstance(value, dict):
+        return value.get(name)
+    return None
+
+
 def bullet(items: list[str], fallback: str = "无") -> str:
     values = items or [fallback]
     return "\n".join(f"- {item}" for item in values)
+
+
+def attr(name: str, value: str) -> str:
+    return f' {name}="{html.escape(value, quote=True)}"' if value else ""
+
+
+def render_structured_mention(value: Any) -> str:
+    if not isinstance(value, dict):
+        return ""
+
+    mention_html = value.get("mention_html") or value.get("html")
+    if mention_html:
+        return str(mention_html)
+
+    text = str(value.get("text") or value.get("name") or value.get("display_name") or "")
+    mention_id = str(value.get("id") or value.get("mention_id") or "")
+    cangjie_key = str(value.get("data-cangjie-key") or value.get("data_cangjie_key") or value.get("cangjie_key") or "")
+    if not text or not (mention_id or cangjie_key):
+        return ""
+
+    visible_text = text if text.startswith("@") else f"@{text}"
+    outer_class = str(value.get("outer_class") or "sc-jJcwTH fUUHak")
+    inner_class = str(value.get("class") or value.get("inner_class") or "sc-cPyLVi jAgzPW")
+    inner_attrs = (
+        attr("data-cangjie-key", cangjie_key)
+        + attr("id", mention_id)
+        + ' data-type="mention"'
+        + attr("class", inner_class)
+    )
+    return (
+        f'<span{attr("class", outer_class)}>'
+        f"<span{inner_attrs}>{html.escape(visible_text)}</span>"
+        "</span>"
+    )
+
+
+def render_mention(config: dict[str, Any], owner_field: str, role: str, fallback: str) -> str:
+    mention_html = pick(config, f"{owner_field}_mention_html")
+    if mention_html:
+        return mention_html
+
+    nested_mentions = [nested_value(config, "owner_mentions", role), nested_value(config, "mentions", role)]
+    for mention in nested_mentions:
+        if isinstance(mention, str) and mention.startswith("<span"):
+            return mention
+
+    structured_mention = (
+        config.get(f"{owner_field}_mention")
+        or next((mention for mention in nested_mentions if isinstance(mention, dict)), None)
+    )
+    rendered = render_structured_mention(structured_mention)
+    if rendered:
+        return rendered
+
+    nested_owner = next((mention for mention in nested_mentions if isinstance(mention, str)), "")
+    owner = pick(config, owner_field) or pick_nested(config, "owners", role) or nested_owner or fallback
+    if owner.startswith("@") or owner.startswith("<span"):
+        return owner
+    return f"@{owner}"
 
 
 def render_done(config: dict[str, Any]) -> str:
@@ -66,9 +141,9 @@ def render_blocked(config: dict[str, Any]) -> str:
 
 
 def render_backend_gap(config: dict[str, Any]) -> str:
-    owner = pick(config, "backend_owner", "<backend owner>")
+    owner = render_mention(config, "backend_owner", "backend", "<backend owner>")
     key = pick(config, "work_item_key", "<work item key>")
-    return f"""@{owner} {key} 需要后端补一下。
+    return f"""{owner} {key} 需要后端补一下。
 
 目标路径：
 {pick(config, 'target_path', '需人工确认')}

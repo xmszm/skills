@@ -30,7 +30,7 @@ Use this reference after an item passes evidence and clarity gates.
 Backend gap shape:
 
 ```text
-@<backend owner> <work item key> 需要后端补一下。
+<backend owner mention> <work item key> 需要后端补一下。
 
 目标路径：
 <frontend path and user action>
@@ -41,6 +41,13 @@ Backend gap shape:
 建议调整：
 <minimal endpoint/request/response change>
 ```
+
+For Yunxiao rich-text writeback, `<backend owner mention>` should be the exact
+mention HTML when available, such as the nested `span` with
+`data-type="mention"` and the visible `@姓名`. Plain `@姓名` is only a fallback
+when no mention HTML is known. If the mention is stored as structured data, keep
+the real Yunxiao `id` and `data-cangjie-key` values with the display name, and
+do not invent either value.
 
 ## Verification Levels
 
